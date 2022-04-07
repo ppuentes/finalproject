@@ -1,23 +1,32 @@
 ---
-title: "112 project"
-output: html_document
+title: 'Tidy Tuesday #5'
+author: "Xinyi Li"
+output: 
+  html_document:
+    df_print: paged
+    code_download: true
+    theme: cerulean
 ---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, error=TRUE, message=FALSE, warning=FALSE)
+```
 
 ```{r}
 library(dplyr)
+library(tidyverse)
 library(readr)
+library(plotly)
+library(gganimate)
+library(lubridate)     
+library(ggthemes)      
+library(janitor)       
+library(ggplot2)
+library(cowplot)
+library(magick)
+library(knitr)
+theme_set(theme_minimal()) 
 ```
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
 ```{r}
 world_report<-read_csv("world-happiness-report.csv")
@@ -25,10 +34,23 @@ world_report<-read_csv("world-happiness-report.csv")
 
 ## Including Plots
 
-You can also embed plots, for example:
+```{r,fig.alt="Average Log Gdp per capita of Colombia, Philippines,China"}
+world_report<-world_report %>% 
+  clean_names()  # for making them normal variable name
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+world_col<-world_report %>% 
+  group_by(country_name) %>% 
+  filter(country_name%in%(c("Colombia","Philippines","China"))) %>% 
+  summarise(average_gdp=mean(log_gdp_per_capita)) %>% 
+  ggplot(aes(x=country_name,y=average_gdp,fill=country_name)) +
+  geom_col()+
+  labs(title="Average LogGdp per capita from 2006 to 2020 of Countries of Marcela,Pia,Xinyi",
+       x="",
+       y="Average Log Gdp per capita")+
+  theme(plot.title = element_text(hjust = 0.5,color="black",face="bold"),
+       legend.position = "none")
+
+ggplotly(world_col)
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
