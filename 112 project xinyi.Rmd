@@ -30,9 +30,9 @@ theme_set(theme_minimal())
 
 ```{r}
 world_report<-read_csv("world-happiness-report.csv")
+heart<-read_csv("heart_2020_cleaned.csv")
 ```
 
-## Including Plots
 
 ```{r,fig.alt="Average Log Gdp per capita of Colombia, Philippines,China"}
 world_report<-world_report %>% 
@@ -51,6 +51,23 @@ world_col<-world_report %>%
        legend.position = "none")
 
 ggplotly(world_col)
+```
+
+```{r,clean data}
+world_report<-world_report %>% 
+  mutate_all(~replace(.,is.na(.),0))
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
