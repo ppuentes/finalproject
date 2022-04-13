@@ -2,13 +2,16 @@
 quantify missing value numbers
 package:naniar(investigating missing value)
 
-#idea1:
+change all na into 0
+
+#idea1: shiny app
 
 
-#idea2:
+
+#idea2: line graph
 
 
-#idea3:
+#idea3: 
 
 
 #idea4:

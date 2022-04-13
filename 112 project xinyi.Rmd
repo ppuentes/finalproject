@@ -29,33 +29,38 @@ theme_set(theme_minimal())
 ```
 
 ```{r}
-world_report<-read_csv("world-happiness-report.csv")
 heart<-read_csv("heart_2020_cleaned.csv")
 ```
 
 
-```{r,fig.alt="Average Log Gdp per capita of Colombia, Philippines,China"}
-world_report<-world_report %>% 
-  clean_names()  # for making them normal variable name
+```{r}
+summary(heart)
 
-world_col<-world_report %>% 
-  group_by(country_name) %>% 
-  filter(country_name%in%(c("Colombia","Philippines","China"))) %>% 
-  summarise(average_gdp=mean(log_gdp_per_capita)) %>% 
-  ggplot(aes(x=country_name,y=average_gdp,fill=country_name)) +
+heart %>% 
+  group_by(Race) %>% 
+  count(HeartDisease)
+
+#bmi groups
+bmi_groups <- heart %>% 
+  mutate(bmi_group=case_when(BMI<18.5~"Underweight",
+                         BMI>=18.5 & BMI<=24.9~"Normal Weight",
+                         BMI>=25 & BMI<=29.9~"Overweight",
+                         BMI>=30 & BMI<=34.9~"Obesity Class I",
+                         BMI>=35 & BMI<=35.9~"Obesity Class II",
+                         BMI>=36~"Extreme Obesity"))
+
+#pattern for mutivariables 
+heart %>% 
+  filter(HeartDisease=="Yes",Sex=="Male") %>% 
+  mutate(num=n()) %>% 
+  ggplot(aes(x=Smoking,y=num))+
   geom_col()+
-  labs(title="Average LogGdp per capita from 2006 to 2020\n of Countries of Marcela,Pia,Xinyi",
-       x="",
-       y="Average Log Gdp per capita")+
-  theme(plot.title = element_text(hjust = 0.5,color="black",face="bold"),
-       legend.position = "none")
-
-ggplotly(world_col)
+  scale_y_continuous(labels=scales::comma)
+  
 ```
 
-```{r,clean data}
-world_report<-world_report %>% 
-  mutate_all(~replace(.,is.na(.),0))
+```{r}
+
 ```
 
 ```{r}
