@@ -40,6 +40,17 @@ heart %>%
   group_by(Race) %>% 
   count(HeartDisease)
 
+#pattern for mutivariables 
+heart %>% 
+  filter(HeartDisease=="Yes",Sex=="Male") %>% 
+  mutate(num=n()) %>% 
+  ggplot(aes(x=Smoking,y=num))+
+  geom_col()+
+  scale_y_continuous(labels=scales::comma)
+
+```
+
+```{r}
 #bmi groups
 bmi_groups <- heart %>% 
   mutate(bmi_group=case_when(BMI<18.5~"Underweight",
@@ -49,18 +60,33 @@ bmi_groups <- heart %>%
                          BMI>=35 & BMI<=35.9~"Obesity Class II",
                          BMI>=36~"Extreme Obesity"))
 
-#pattern for mutivariables 
+#correlation with bmi and heart disease
 heart %>% 
-  filter(HeartDisease=="Yes",Sex=="Male") %>% 
-  mutate(num=n()) %>% 
-  ggplot(aes(x=Smoking,y=num))+
+  filter(BMI<50) %>% 
+  ggplot(aes(x=HeartDisease,y=BMI))+
+  geom_boxplot()+
+  labs(title="BMI average of groups with and without Heart Disease")+
+  theme(plot.title = element_text(hjust=0.5,face="bold"))
+
+bmi_groups %>% 
+  filter(is.na(bmi_group)==FALSE) %>% 
+  ggplot(aes(x=HeartDisease,y=bmi_group,fill=bmi_group))+
   geom_col()+
-  scale_y_continuous(labels=scales::comma)
-  
-```
+  facet_wrap(vars(bmi_group))
 
-```{r}
+#facet over race
+bmi_groups %>% 
+  filter(is.na(bmi_group)==FALSE) %>% 
+  select(HeartDisease,BMI,Race) %>% 
+  group_by(Race,HeartDisease) %>% 
+  mutate(mean_bmi=mean(BMI)) %>% 
+  ggplot(aes(x=HeartDisease,y=mean_bmi,fill=Race))+
+  geom_col()+
+  geom_text(aes(label=mean_bmi), vjust=1.6, size=3.5)+
+  scale_y_continuous(labels=scales::comma,limits = c(0,100))+
+  facet_wrap(vars(Race))
 
+#facet over age group
 ```
 
 ```{r}
