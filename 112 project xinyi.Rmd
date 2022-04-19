@@ -40,22 +40,23 @@ heart %>%
   group_by(Race) %>% 
   count(HeartDisease)
 
-#pattern for mutivariables 
-heart %>% 
-  filter(HeartDisease=="Yes",Sex=="Male") %>% 
-  mutate(num=n()) %>% 
-  ggplot(aes(x=Smoking,y=num))+
-  geom_col()+
-  scale_y_continuous(labels=scales::comma)
+# heart %>% 
+#   filter(HeartDisease=="Yes",Sex=="Male") %>% 
+#   mutate(num=n()) %>% 
+#   ggplot(aes(x=Smoking,y=num))+
+#   geom_col()+
+#   scale_y_continuous(labels=scales::comma)
 
 ```
+
 ```{r}
 #section 3
-#correlation with bmi and heart disease
+#boxplot
 heart %>% 
   filter(BMI<50) %>% 
   ggplot(aes(x=HeartDisease,y=BMI))+
-  geom_boxplot()+
+  geom_boxplot(notch = TRUE,fill = "cornflowerblue", 
+               alpha = .7)+
   labs(title="BMI average of groups with and without Heart Disease")+
   theme(plot.title = element_text(hjust=0.5,face="bold"))
 ```
@@ -70,8 +71,11 @@ bmi_groups <- heart %>%
                          BMI>=30 & BMI<=34.9~"Obesity Class I",
                          BMI>=35 & BMI<=35.9~"Obesity Class II",
                          BMI>=36~"Extreme Obesity"))
+```
 
-#bmi groups and heart disease
+```{r}
+#bmi groups-heart disease
+#first col-plot
 bmi_groups %>% 
   filter(is.na(bmi_group)==FALSE) %>% 
   ggplot(aes(x=HeartDisease,y=bmi_group,fill=bmi_group))+
@@ -83,50 +87,45 @@ bmi_groups %>%
         axis.ticks.y=element_blank(),
         plot.title = element_text(hjust=0.5,face="bold"))+
   facet_wrap(vars(bmi_group))
+```
+```{r}
+# bmi_groups %>% 
+#   group_by(Race,HeartDisease) %>% 
+#   summarise(mean_bmi=mean(BMI)) %>% 
+#   ggplot(aes(x=HeartDisease,y=mean_bmi,fill=Race))+
+#   geom_bar(stat = "identity",position="dodge")+
+#   geom_text(aes(label = round(mean_bmi,2)),position = position_dodge(.9), vjust = 1.5, colour = "white", size = 2)+
+#   scale_y_continuous(labels=scales::comma)+
+#   facet_wrap(vars(Race))+
+#   labs(title="BMI average of sex and race groups with and without Heart Disease",
+#        y="Average BMI")
+```
 
-#facet over race
-#subject to change
-#filter to 50?
+```{r}
+#stacked bar plot
 bmi_groups %>% 
-  filter(BMI<50) %>% 
-  filter(is.na(bmi_group)==FALSE) %>% 
-  select(HeartDisease,BMI,Race) %>% 
-  group_by(Race,HeartDisease) %>% 
-  mutate(mean_bmi=mean(BMI)) %>% 
-  ggplot(aes(x=HeartDisease,y=mean_bmi,fill=Race))+
-  geom_col()+
-  theme(legend.position="none",
-        plot.title = element_text(hjust=0.5,face="bold"),
-        panel.grid.major = element_blank())+
-  scale_y_continuous(labels=scales::comma,limits = c(0,50))+
+  group_by(Race,HeartDisease,Sex) %>% 
+  summarise(mean_bmi=mean(BMI)) %>% 
+  ggplot(aes(x=HeartDisease,y=mean_bmi,fill=Sex))+
+  geom_bar(stat = "identity",position="dodge")+
+  geom_text(aes(label = round(mean_bmi,2)),position = position_dodge(.9), vjust = 1.5, colour = "white", size = 2)+
+  scale_y_continuous(labels=scales::comma)+
   facet_wrap(vars(Race))+
-  labs(title="BMI average of race groups with and without Heart Disease",
+  scale_fill_manual(values = c("darkslateblue","deepskyblue3"))+
+  labs(title="BMI average of sex and race groups with and without Heart Disease",
        y="Average BMI")
+```
 
+```{r}
+#search: how to plot categorcial data
+#other graph type:mosaic,density,scatter, see the data viz textbook
+#add percentage to the pie chart
+#other correlation type?
+#anyway to make scatter or linear?
 
 #facet over age group
 
 #over smoking?
-
-#over sex ?
-#limits? 55 kai
-bmi_groups %>% 
-  filter(BMI<50) %>% 
-  group_by(Race,HeartDisease,Sex) %>% 
-  mutate(mean_bmi=mean(BMI)) %>% 
-  ggplot(aes(x=HeartDisease,y=mean_bmi,fill=Sex))+
-  geom_bar(stat = "identity")+
-  scale_y_continuous(labels=scales::comma)+
-  facet_wrap(vars(Race))
-
-
-#other graph type?
-#other correlation type?
-#anyway to make scatter or linear?
-```
-
-```{r}
-
 ```
 
 ```{r}
