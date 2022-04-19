@@ -7,22 +7,58 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+```{r}
+library(readr)
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+library(janitor)
+library(plotly)
+library(gganimate)
+library(ggthemes)
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
+Reading in:
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+health <- read_csv("heart_2020_cleaned.csv")
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+bmi_groups <- health %>% 
+  clean_names() %>% 
+  mutate(bmi_group=case_when(bmi<18.5~"Underweight",
+                         bmi>=18.5 & bmi<=24.9~"Normal Weight",
+                         bmi>=25 & bmi<=29.9~"Overweight",
+                         bmi>=30 & bmi<=34.9~"Obesity Class I",
+                         bmi>=35 & bmi<=35.9~"Obesity Class II",
+                         bmi>=36~"Extreme Obesity"))
+
+```
+
+```{r}
+weight <- 50
+height <- 150
+
+dataset <- tibble(weight,
+                  height) %>% 
+  mutate(BMI_val = weight/((height/100)^2),
+         bmi_cat = case_when(BMI_val<18.5~"Underweight",
+                         BMI_val>=18.5 & BMI_val<=24.9~"Normal Weight",
+                         BMI_val>=25 & BMI_val<=29.9~"Overweight",
+                         BMI_val>=30 & BMI_val<=34.9~"Obesity Class I",
+                         BMI_val>=35 & BMI_val<=35.9~"Obesity Class II",
+                         BMI_val>=36~"Extreme Obesity")) 
+user_bmi <- dataset$bmi_cat
+
+bmi_groups %>% 
+  clean_names() %>% 
+  filter(bmi_group == user_bmi,
+         sex == "Female",
+         age_category == "18-24",
+         physical_activity == "No") %>% 
+  summarize(heart_disease_prevalence =  (sum(heart_disease == "Yes")/n())*100,
+            no_heart_disease = (sum(heart_disease == "No")/n())*100)
+```
+
