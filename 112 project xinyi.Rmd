@@ -37,7 +37,7 @@ heart<-read_csv("heart_2020_cleaned.csv")
 summary(heart)
 
 heart %>% 
-  group_by(Race) %>% 
+  group_by(Sex) %>% 
   count(HeartDisease)
 
 # heart %>% 
@@ -124,16 +124,30 @@ bmi_groups %>%
 #anyway to make scatter or linear?
 
 #facet over age group
+```
 
-#over smoking?
+#habbits and heart disease
+```{r}
+#sleep and heart disease
+bmi_groups %>% 
+  ggplot(aes(x=SleepTime,fill=HeartDisease))+
+  xlim(0,14)+
+  geom_density(alpha = 0.5)+ 
+  labs(title="Heart Disease Probability correlated to average sleep time",
+       y="Probability of heart disease")+
+  #facet_wrap(vars(Smoking))+ #or alcoholdrinking
+  theme(plot.title = element_text(face="bold",color="black",hjust=0.5),
+        legend.position = "bottom")#start from here,stack
 ```
 
 ```{r}
-
-```
-
-```{r}
-
+hi<-bmi_groups %>% 
+  filter(HeartDisease=="Yes") %>% 
+  group_by(AlcoholDrinking) %>% 
+  count()
+hi %>% 
+  ggplot(aes(fill=AlcoholDrinking,area=n,label=AlcoholDrinking))+
+  geom_treemap()
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
