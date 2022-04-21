@@ -166,17 +166,26 @@ bmi_groups %>%
 ```
 
 ```{r}
+#alcohol drinking and heart disease
+
+#??other forms?
 bmi_groups %>% 
-  ggplot(aes(x=AlcoholDrinking,y=HeartDisease))+
-  geom_mosaic()
+  ggplot(aes(x=AlcoholDrinking,y=HeartDisease,fill=AlcoholDrinking))+
+  geom_col()+
+  facet_wrap(vars(HeartDisease))
+```
+```{r}
+#smoking and heart disease
+
+#??other forms?
+bmi_groups %>% 
+  ggplot(aes(x=Smoking,y=HeartDisease,fill=Smoking))+
+  geom_col()+
+  facet_wrap(vars(HeartDisease))
 ```
 
 ```{r}
-#search: how to plot categorcial data
 #other graph type:mosaic,density,scatter,dotplot, see the data viz textbook
-#add percentage to the pie chart
 #other correlation type?
 #anyway to make scatter or linear?
-
-#facet over age group
 ```
