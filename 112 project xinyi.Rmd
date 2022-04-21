@@ -40,6 +40,10 @@ heart %>%
   group_by(Sex) %>% 
   count(HeartDisease)
 
+heart %>% 
+  group_by(AgeCategory) %>% 
+  count(HeartDisease)
+
 # heart %>% 
 #   filter(HeartDisease=="Yes",Sex=="Male") %>% 
 #   mutate(num=n()) %>% 
@@ -48,6 +52,36 @@ heart %>%
 #   scale_y_continuous(labels=scales::comma)
 
 ```
+
+```{r}
+#age group and heart disease
+heart %>% 
+  count(AgeCategory)
+
+heart %>% 
+  filter(HeartDisease=="Yes") %>% 
+  ggplot(aes(x=AgeCategory,fill=AgeCategory))+
+  geom_density(alpha=0.4)+
+  theme(axis.text.x=element_text(angle=45),panel.grid.major = element_blank(),
+        plot.title = element_text(face="bold",color="black",hjust=0.5))+
+  labs(title="Age groups and heart disease",y="proportion of population with heart disease",x="")
+
+
+#the ridges plot
+
+# heart %>% 
+#   filter(HeartDisease=="Yes") %>% 
+#   group_by(AgeCategory) %>% 
+#   summarise(n=n()) %>% 
+#   ggplot(aes(x=n,y=AgeCategory,fill=AgeCategory))+
+#   geom_density_ridges() +
+#   theme_ridges() +
+#   geom_line()+
+#   labs(title="Age groups and heart disease",y="proportion of population with heart disease",x="")
+```
+
+
+
 
 ```{r}
 #section 3
@@ -116,15 +150,6 @@ bmi_groups %>%
        y="Average BMI")
 ```
 
-```{r}
-#search: how to plot categorcial data
-#other graph type:mosaic,density,scatter, see the data viz textbook
-#add percentage to the pie chart
-#other correlation type?
-#anyway to make scatter or linear?
-
-#facet over age group
-```
 
 #habbits and heart disease
 ```{r}
@@ -141,13 +166,17 @@ bmi_groups %>%
 ```
 
 ```{r}
-hi<-bmi_groups %>% 
-  filter(HeartDisease=="Yes") %>% 
-  group_by(AlcoholDrinking) %>% 
-  count()
-hi %>% 
-  ggplot(aes(fill=AlcoholDrinking,area=n,label=AlcoholDrinking))+
-  geom_treemap()
+bmi_groups %>% 
+  ggplot(aes(x=AlcoholDrinking,y=HeartDisease))+
+  geom_mosaic()
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+#search: how to plot categorcial data
+#other graph type:mosaic,density,scatter,dotplot, see the data viz textbook
+#add percentage to the pie chart
+#other correlation type?
+#anyway to make scatter or linear?
+
+#facet over age group
+```
