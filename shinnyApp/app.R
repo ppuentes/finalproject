@@ -10,6 +10,7 @@ library(gganimate)
 library(ggthemes)
 library(rsconnect)
 library(scales)
+library(ggtext)
 
 
 #Reading the dataset 
@@ -27,9 +28,11 @@ bmi_groups <- health %>%
                              bmi>=36~"Extreme Obesity"))
 
 ui <- fluidPage(
-  numericInput(inputId = "weight",
+  sidebarLayout(
+  sidebarPanel(
+    numericInput(inputId = "weight",
                label = "Weight (Kg)",
-               value = "50"),
+               value = "65"),
   numericInput(inputId = "height",
                label = "Height (Cm)",
                value = "170"),
@@ -46,9 +49,13 @@ ui <- fluidPage(
   selectInput(inputId = "phys_act",
                label = "Physical Activity",
                choices = list(Yes = "Yes", No = "No")),
-  submitButton(text="Ready!"),
-  plotOutput(outputId = "Percentage_plot")
-  )
+  selectInput(inputId = "smoking",
+              label = "Smoke",
+              choices = list(Yes = "Yes", No = "No")),
+  submitButton(text="Ready!")),
+  mainPanel(
+    plotOutput(outputId = "Percentage_plot")
+  )))
 
 
 server<-function(input,output){
@@ -63,37 +70,41 @@ server<-function(input,output){
                       height) %>%
       mutate(BMI_val = weight/((height/100)^2),
              bmi_cat = case_when(BMI_val<18.5~"Underweight",
-                                 BMI_val>=18.5 & BMI_val<=24.9~"Normal Weight",
-                                 BMI_val>=25 & BMI_val<=29.9~"Overweight",
-                                 BMI_val>=30 & BMI_val<=34.9~"Obesity Class I",
-                                 BMI_val>=35 & BMI_val<=35.9~"Obesity Class II",
-                                 BMI_val>=36~"Extreme Obesity"))
+                                 BMI_val>=18.5 & BMI_val<25~"Normal Weight",
+                                 BMI_val>=25 & BMI_val<30~"Overweight",
+                                 BMI_val>=30 & BMI_val<35~"Obesity Class I",
+                                 BMI_val>=35 & BMI_val<36~"Obesity Class II",
+                                 BMI_val>=36~"Extreme Obesity")) 
     user_bmi <- dataset$bmi_cat
     
     app_data <- bmi_groups %>%
       filter(bmi_group == user_bmi,
              sex == input$sex,
              age_category == input$age_cat,
-             physical_activity == input$phys_act) %>% 
+             physical_activity == input$phys_act,
+             smoking == input$smoking) %>% 
       group_by(heart_disease) %>% 
-      mutate(prop= n()/sum(n()))
+      mutate(count_per_HDPrevalence= n()) %>% 
+      ungroup() %>% 
+      mutate(total= n(),
+             prop= (count_per_HDPrevalence/total))
   
     
     bar_distribution <- app_data%>%
-      #summarize(heart_disease_prevalence =  (sum(heart_disease == "Yes")/n())*100,
-                #no_heart_disease = (sum(heart_disease == "No")/n())*100) %>%
       ggplot()+
-      geom_bar(aes(x=1, fill = heart_disease), position = "stack")+
-      labs(title= "Demographics of Similar Characteristics to Those Input and the Proportion of Heart Disease Prevalence")+
+      geom_bar(aes(x=1, fill = heart_disease), position = "fill",show.legend = FALSE)+
       theme_clean()
     
     pie <- bar_distribution +
       coord_polar("y", start= 0)+
-      scale_fill_brewer(palette="Blues")+
-      #labs(x= " ", y = " ")+
-      theme_void()#+
-      geom_text(aes(x= 1, y= prop, label= " "))
-    
+      scale_fill_brewer(palette="Pastel1")+
+      theme_void()+
+      geom_text(aes(x= 1, y= prop/1.5, label= scales::percent(prop, accuracy = 0.01)))+
+      labs(x= NULL,
+           y= NULL,
+           title= "Percentage of Population of Similar Characteristics <span style = 'color: lightblue2;'>with Heart Disease</span>")+
+      theme(plot.title = element_markdown())
+
     pie
   })
 }
