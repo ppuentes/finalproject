@@ -195,6 +195,7 @@ bmi_groups %>%
         legend.position = "bottom")
 ```
 
+
 B. Alcohol Drinking and Smoking
 ```{r,echo=FALSE}
 drinking<-bmi_groups %>% 
@@ -212,5 +213,7 @@ drinking+smoking
 
 V. Calculator of People With Heart Disease According To Factors
 
+[here](https://marcelasaavedra.shinyapps.io/Heart_Disease_Prevalence/)
 
+##Conclusion
 
