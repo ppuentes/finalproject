@@ -1,28 +1,167 @@
 ---
-title: "finaltt"
+title: "Pia's Tidy Tuesday"
 output: html_document
 ---
+```{r}
+library(readr)
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+library(janitor)
+library(plotly)
+library(gganimate)
+library(scales)
+library (fmsb)
+library(tidyverse)     # for data cleaning and plotting
+library(gardenR)       # for Lisa's garden data
+library(lubridate)     # for date manipulation
+library(openintro)     # for the abbr2state() function
+library(palmerpenguins)# for Palmer penguin data
+library(maps)          # for map data
+library(ggmap)         # for mapping points on maps
+library(gplots)        # for col2hex() function
+library(RColorBrewer)  # for color palettes
+library(sf)            # for working with spatial data
+library(leaflet)       # for highly customizable mapping
+library(ggthemes)      # for more themes (including theme_map())
+library(plotly)        # for the ggplotly() - basic interactivity
+library(gganimate)     # for adding animation layers to ggplots
+library(gifski)        # for creating the gif (don't need to load this library every time,but need it installed)
+library(transformr)    # for "tweening" (gganimate)
+library(shiny)         # for creating interactive apps
+library(patchwork)     # for nicely combining ggplot2 graphs  
+library(gt)            # for creating nice tables
+library(rvest)         # for scraping data
+library(robotstxt)     # for checking if you can scrape data
+theme_set(theme_minimal())
+```
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+```{r}
+heart_disease <- read_csv("heart_2020_cleaned.csv")
+```
+ 
+```{r}
+sample <- heart_disease %>% 
+  select(HeartDisease, BMI, Smoking, Sex, AgeCategory, Race) %>% 
+  count(HeartDisease, BMI, Smoking, Sex, AgeCategory, Race) 
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+sample_gt <- sample %>% 
+  gt(rowname_col = "row",
+    groupname_col = "group") %>% 
+  tab_options(column_labels.background.color = "lightblue") %>% 
+   tab_header(
+    title = "Race of Sample from Dataset",
+    subtitle = md("")
+  ) 
 
-```{r cars}
-summary(cars)
+sample_gt
+```
+ 
+
+```{r}
+gt1 <- heart_disease %>% 
+  group_by(HeartDisease) %>% 
+  count(Sex) %>% 
+  mutate(Percentage = 100*(n/sum(n))) %>% 
+  ggplot(aes(x = Sex,
+             y = n, 
+             fill = HeartDisease)) +
+  geom_col() +
+  scale_y_continuous(labels = comma) +
+  labs(title = "Sex of Sample") +
+  theme(
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        plot.title = element_text(hjust = 0.5), 
+        plot.caption = element_text(size = 8.5)) 
+
+ggplotly(gt1)
+```
+, 
+       caption = "Although there are more females than males in this sample, the difference in number of participants between either sex is not that large."
+
+```{r}
+heart_disease %>% 
+  count(Race) %>% 
+  mutate(Percentage = 100*(n/sum(n)),
+          Race= str_replace(Race, "American Indian/Alaskan Native", "American Indian or
+                               Alaskan Native")) %>% 
+  ggplot() +
+  geom_col(aes(x= n, y = fct_reorder(Race, n), fill = Race)) +
+  scale_x_continuous(labels = comma) +
+  labs(title = "Race of Sample",
+        caption = "There are significantly more White identifying individuals in this sample compared to the five other races that participants identified as.") +
+  theme(legend.position = "none",
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        plot.title = element_text(hjust = 0.5), 
+        plot.caption = element_text(size = 8))
+
+
+race_gt <- race %>% 
+  gt(rowname_col = "row",
+    groupname_col = "group") %>% 
+  tab_options(column_labels.background.color = "lightpink") %>% 
+   tab_header(
+    title = "Race of Sample from Dataset",
+    subtitle = md("")
+  ) 
+
+race_gt
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
+```{r}
+gt2 <- heart_disease %>% 
+  mutate(Race= str_replace(Race, "American Indian/Alaskan Native", "American Indian or
+                               Alaskan Native")) %>% 
+  group_by(Race) %>% 
+  count(HeartDisease) %>% 
+  ggplot(aes(x= n, y = fct_reorder(Race, n), fill = HeartDisease)) +
+  geom_col() +
+  scale_x_continuous(labels = comma) +
+  labs(title = "Heart Disease Prevalence by Race") +
+  theme(axis.text.y.left = element_text(size = 7),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        plot.title = element_text(hjust = 0.5), 
+        plot.caption = element_text(size = 8))
 
-```{r pressure, echo=FALSE}
-plot(pressure)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+gt3 <- heart_disease %>% 
+  mutate(Race= str_replace(Race, "American Indian/Alaskan Native", "American Indian or
+                               Alaskan Native")) %>% 
+  group_by(AgeCategory) %>% 
+  count(HeartDisease) %>% 
+  ggplot(aes(y = AgeCategory,
+             x = n, 
+             fill = HeartDisease), position = "stack") +
+  geom_col() +
+  scale_x_continuous(labels = comma) +
+  labs(title = "Heart Disease Prevalence by Age Group") +
+  theme(axis.text.y.left = element_text(size = 7),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        plot.title = element_text(hjust = 0.5), 
+        plot.caption = element_text(size = 8))
+
+```
+
+```{r}
+(gt2/gt3) 
+```
