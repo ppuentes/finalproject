@@ -200,10 +200,12 @@ B. Alcohol Drinking and Smoking
 ```{r,echo=FALSE}
 drinking<-bmi_groups %>% 
   ggplot(aes(x=AlcoholDrinking,y=HeartDisease,fill=HeartDisease))+
+  theme(axis.text.y = element_blank())+
   geom_bar(stat="identity")
 
 smoking<-bmi_groups %>% 
   ggplot(aes(x=Smoking,y=HeartDisease,fill=HeartDisease))+
+  theme(axis.text.y = element_blank())+
   geom_bar(stat="identity")
 
 drinking+smoking
