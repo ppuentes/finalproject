@@ -37,7 +37,11 @@ heart<-read_csv("heart_2020_cleaned.csv")
 summary(heart)
 
 heart %>% 
-  group_by(Race) %>% 
+  group_by(Sex) %>% 
+  count(HeartDisease)
+
+heart %>% 
+  group_by(AgeCategory) %>% 
   count(HeartDisease)
 
 # heart %>% 
@@ -48,6 +52,36 @@ heart %>%
 #   scale_y_continuous(labels=scales::comma)
 
 ```
+
+```{r}
+#age group and heart disease
+heart %>% 
+  count(AgeCategory)
+
+heart %>% 
+  filter(HeartDisease=="Yes") %>% 
+  ggplot(aes(x=AgeCategory,fill=AgeCategory))+
+  geom_density(alpha=0.4)+
+  theme(axis.text.x=element_text(angle=45),panel.grid.major = element_blank(),
+        plot.title = element_text(face="bold",color="black",hjust=0.5))+
+  labs(title="Age groups and heart disease",y="proportion of population with heart disease",x="")
+
+
+#the ridges plot
+
+# heart %>% 
+#   filter(HeartDisease=="Yes") %>% 
+#   group_by(AgeCategory) %>% 
+#   summarise(n=n()) %>% 
+#   ggplot(aes(x=n,y=AgeCategory,fill=AgeCategory))+
+#   geom_density_ridges() +
+#   theme_ridges() +
+#   geom_line()+
+#   labs(title="Age groups and heart disease",y="proportion of population with heart disease",x="")
+```
+
+
+
 
 ```{r}
 #section 3
@@ -116,24 +150,42 @@ bmi_groups %>%
        y="Average BMI")
 ```
 
+
+#habbits and heart disease
 ```{r}
-#search: how to plot categorcial data
-#other graph type:mosaic,density,scatter, see the data viz textbook
-#add percentage to the pie chart
+#sleep and heart disease
+bmi_groups %>% 
+  ggplot(aes(x=SleepTime,fill=HeartDisease))+
+  xlim(0,14)+
+  geom_density(alpha = 0.5)+ 
+  labs(title="Heart Disease Probability correlated to average sleep time",
+       y="Probability of heart disease")+
+  #facet_wrap(vars(Smoking))+ #or alcoholdrinking
+  theme(plot.title = element_text(face="bold",color="black",hjust=0.5),
+        legend.position = "bottom")#start from here,stack
+```
+
+```{r}
+#alcohol drinking and heart disease
+
+#??other forms?
+bmi_groups %>% 
+  ggplot(aes(x=AlcoholDrinking,y=HeartDisease,fill=AlcoholDrinking))+
+  geom_col()+
+  facet_wrap(vars(HeartDisease))
+```
+```{r}
+#smoking and heart disease
+
+#??other forms?
+bmi_groups %>% 
+  ggplot(aes(x=Smoking,y=HeartDisease,fill=Smoking))+
+  geom_col()+
+  facet_wrap(vars(HeartDisease))
+```
+
+```{r}
+#other graph type:mosaic,density,scatter,dotplot, see the data viz textbook
 #other correlation type?
 #anyway to make scatter or linear?
-
-#facet over age group
-
-#over smoking?
 ```
-
-```{r}
-
-```
-
-```{r}
-
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
