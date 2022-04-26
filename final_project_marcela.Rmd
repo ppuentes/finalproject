@@ -38,19 +38,21 @@ bmi_groups <- health %>%
 ```
 
 ```{r}
-weight <- 50
-height <- 150
+weight <- 73
+height <- 171
 
 dataset <- tibble(weight,
                   height) %>% 
   mutate(BMI_val = weight/((height/100)^2),
          bmi_cat = case_when(BMI_val<18.5~"Underweight",
-                         BMI_val>=18.5 & BMI_val<=24.9~"Normal Weight",
-                         BMI_val>=25 & BMI_val<=29.9~"Overweight",
-                         BMI_val>=30 & BMI_val<=34.9~"Obesity Class I",
-                         BMI_val>=35 & BMI_val<=35.9~"Obesity Class II",
+                         BMI_val>=18.5 & BMI_val<25~"Normal Weight",
+                         BMI_val>=25 & BMI_val<30~"Overweight",
+                         BMI_val>=30 & BMI_val<35~"Obesity Class I",
+                         BMI_val>=35 & BMI_val<36~"Obesity Class II",
                          BMI_val>=36~"Extreme Obesity")) 
 user_bmi <- dataset$bmi_cat
+
+dataset
 
 bmi_groups %>% 
   clean_names() %>% 
@@ -60,5 +62,9 @@ bmi_groups %>%
          physical_activity == "No") %>% 
   summarize(heart_disease_prevalence =  (sum(heart_disease == "Yes")/n())*100,
             no_heart_disease = (sum(heart_disease == "No")/n())*100)
+```
+
+```{r}
+table(bmi_groups$gen_health)
 ```
 
