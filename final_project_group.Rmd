@@ -9,11 +9,11 @@ output:
     theme: cerulean
 ---
 
-```{r setup, include=FALSE,echo=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,warning = FALSE,message=FALSE)
 ```
 
-```{r,echo=FALSE}
+```{r}
 library(dplyr)
 library(tidyverse)
 library(readr)
@@ -203,7 +203,9 @@ gt3 <- heart %>%
 
 gt3 + (gt2/gt1) 
 ```
-\  
+
+
+
 Heart disease patients are mostly distributed in elderly groups over the age 50.From individuals with the age smaller than 50, heart disease is a rarely seen prevalence with a rate lower then 5%. In each age group over 50 while smaller than 75, the rate of heart disease is about 10% to 16%. In elder age groups, the rate of heart disease is about 20%, accounting for one-fifth of the population.
 \  
 As the survey has the most components as white subjects, the overall rate of heart disease prevalence for white seems to be overwhelmingly high, while it's not the genuine truth due to unequal distributed population.
@@ -337,7 +339,9 @@ bmi_groups %>%
 
 ```
 
-\  
+
+
+
 The sleeping pattern of both groups with or without heart disease don't vary a lot, as the most sleep around 6-8 hours a day. While we would observe some sleeping hour over 10 in the group with heart disease, as it is also a scientific theory that oversleep would be the factor of Cardiovascular disease.
 
 \  
@@ -383,7 +387,9 @@ theme(axis.text.y = element_blank(),
 
 drinking+smoking
 ```
-\  
+
+
+
 In terms of individuals who drink, approximately 92% of them do not have heart disease, suggesting it's not a deciding factor. Surprisingly, the rate of people without heart disease in the non-drinking group is similar, at 91.4%, also supporting the conclusion.
 \  
 In the non-smoking group, 93% are reported to have no heart disease, while the rate in smoking group is onlu 87%, suggesting smoking habit has a bigger impact on heart disease than drinking.
