@@ -203,6 +203,14 @@ gt3 <- heart %>%
 
 gt3 + (gt2/gt1) 
 ```
+\  
+Heart disease patients are mostly distributed in elderly groups over the age 50.From individuals with the age smaller than 50, heart disease is a rarely seen prevalence with a rate lower then 5%. In each age group over 50 while smaller than 75, the rate of heart disease is about 10% to 16%. In elder age groups, the rate of heart disease is about 20%, accounting for one-fifth of the population.
+\  
+As the survey has the most components as white subjects, the overall rate of heart disease prevalence for white seems to be overwhelmingly high, while it's not the genuine truth due to unequal distributed population.
+\  
+Male appear to have higher rates of heart disease, which is about 11%, than female do, which is about 6.5%.
+
+
 
 
 **II. BMI and Heart Disease**
@@ -302,6 +310,14 @@ bmi_groups %>%
                                   size = 10))
 ```
 
+\  
+
+There's not an observation of sharp distinction between male and female in both heart disease groups,suggesting sex is not an deciding factor of Heart Disease. However, male generally do have relatively higher BMI average than female do. 
+\  
+Among all race and sex groups, the ones with heart disease generally appear to have higher BMI average for both sexes, suggesting the possibility that higher BMI leads to higher heart disease risk.
+\  
+
+
 **IV. Heart Disease and Lifestyle Choices**
 
 A. Sleep time
@@ -315,12 +331,16 @@ bmi_groups %>%
   labs(title="Heart Disease Correlated to Average Sleep Time",
        x="Average Sleep Time(hour)")+
   theme(plot.title = element_text(face="bold",color="black",hjust=0.5),
-        legend.position = "bottom",
+        legend.position = "none",
         panel.grid.major.x = element_blank(),
         panel.grid.minor.x = element_blank())
 
 ```
 
+\  
+The sleeping pattern of both groups with or without heart disease don't vary a lot, as the most sleep around 6-8 hours a day. While we would observe some sleeping hour over 10 in the group with heart disease, as it is also a scientific theory that oversleep would be the factor of Cardiovascular disease.
+
+\  
 
 
 B. Heart Disease when Drinking Alcohol and Smoking
@@ -363,12 +383,21 @@ theme(axis.text.y = element_blank(),
 
 drinking+smoking
 ```
+\  
+In terms of individuals who drink, approximately 92% of them do not have heart disease, suggesting it's not a deciding factor. Surprisingly, the rate of people without heart disease in the non-drinking group is similar, at 91.4%, also supporting the conclusion.
+\  
+In the non-smoking group, 93% are reported to have no heart disease, while the rate in smoking group is onlu 87%, suggesting smoking habit has a bigger impact on heart disease than drinking.
+\  
+
+
 
 **V. Heart Disease Calculator**
 
 Using this calculator app, individuals may indicate characteristics and lifestyle choices to see the proportion of participants from the survey with similar backgrounds who have and do not have heart disease. Through comparisons, they may be able to have some insight on the likelihood of getting heart disease. 
 
 [here](https://marcelasaavedra.shinyapps.io/Heart_Disease_Prevalence/)
+
+\  
 
 ## Conclusion
 
