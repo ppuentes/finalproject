@@ -25,6 +25,23 @@ library(patchwork)
 library(ggthemes)      
 library(janitor)       
 library(ggplot2)
+library(scales)
+library (fmsb)
+library(openintro)     # for the abbr2state() function
+library(palmerpenguins)# for Palmer penguin data
+library(maps)          # for map data
+library(ggmap)         # for mapping points on maps
+library(gplots)        # for col2hex() function
+library(RColorBrewer)  # for color palettes
+library(sf)            # for working with spatial data
+library(leaflet)       # for highly customizable mapping
+library(ggthemes)      # for more themes (including theme_map())
+library(plotly)        # for the ggplotly() - basic interactivity
+library(gifski)        # for creating the gif (don't need to load this library every time,but need it installed)
+library(transformr)    # for "tweening" (gganimate)
+library(shiny)        
+library(rvest)        
+library(robotstxt)    
 library(cowplot)
 library(magick)
 library(knitr)
@@ -50,7 +67,7 @@ Originally, the dataset comes from the CDC and is a major part of the Behavioral
 
 # DEMOGRAPHICS OF SAMPLES
 
-I.Number of subjects according to sex
+I.Tibble Table of general samples(Race and Sex)
 
 ```{r,echo=FALSE}
 heart1 <- heart %>% 
@@ -69,8 +86,6 @@ heart_gt <- heart1 %>%
 heart_gt
 ```
 
-
-II.Number of Sample according to Race
 
 ```{r,echo=FALSE}
 race <- heart %>% 
@@ -92,34 +107,68 @@ race_gt
 
 # DEMOGRAPHICS & HEART DISEASE PREVALENCE
 
-I.Race and Heart Disease
-
+I.Race,Age Group,Sex and Heart Disease
 ```{r,echo=FALSE}
-race_prevalence <- heart %>% 
-  group_by(Race) %>% 
-  count(HeartDisease) %>% 
-  ggplot(aes(x = Race,
-             y = n, 
+gt1 <- heart %>%
+  group_by(HeartDisease) %>%
+  count(Sex) %>%
+  mutate(Percentage = 100*(n/sum(n))) %>%
+  ggplot(aes(x = Sex,
+             y = n,
+             fill = HeartDisease)) +
+  geom_col() +
+  scale_y_continuous(labels = comma) +
+  scale_fill_manual(values = c("#008B8B","#7FFFD4"))+
+  labs(title = "Sex of Sample") +
+  theme(
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        plot.title = element_text(hjust = 0.5),
+        plot.caption = element_text(size = 8.5))
+
+gt2 <- heart %>%
+  mutate(Race= str_replace(Race, "American Indian/Alaskan Native", "American Indian or
+                               Alaskan Native")) %>%
+  group_by(Race) %>%
+  count(HeartDisease) %>%
+  ggplot(aes(x= n, y = fct_reorder(Race, n), fill = HeartDisease)) +
+  geom_col() +
+  scale_x_continuous(labels = comma) +
+  labs(title = "Heart Disease Prevalence by Race") +
+  scale_fill_manual(values = c("darkslateblue","deepskyblue3"))+
+  theme(axis.text.y.left = element_text(size = 7),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        plot.title = element_text(hjust = 0.5),
+        plot.caption = element_text(size = 8))
+
+gt3 <- heart %>%
+  mutate(Race= str_replace(Race, "American Indian/Alaskan Native", "American Indian or
+                               Alaskan Native")) %>%
+  group_by(AgeCategory) %>%
+  count(HeartDisease) %>%
+  ggplot(aes(y = AgeCategory,
+             x = n,
              fill = HeartDisease), position = "stack") +
   geom_col() +
-  labs(title = "Heart Disease Prevalence by Race")
-  theme(axis.title.y = element_blank(),
-        axis.text.x = element_text(size = 6.5))
-  
-ggplotly(race_prevalence)
+  scale_x_continuous(labels = comma) +
+  labs(title = "Heart Disease Prevalence by Age Group") +
+  scale_fill_manual(values = c("#8A2BE2","#FFB6C1"))+
+  theme(axis.text.y.left = element_text(size = 7),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        plot.title = element_text(hjust = 0.5),
+        plot.caption = element_text(size = 8))
+
+(gt2/gt3) + gt1
 ```
 
-II.Age Groups and Heart Disease
-
-```{r,echo=FALSE}
-heart %>% 
-  filter(HeartDisease=="Yes") %>% 
-  ggplot(aes(x=AgeCategory,fill=AgeCategory))+
-  geom_density(alpha=0.4)+
-  theme(axis.text.x=element_text(angle=45),panel.grid.major = element_blank(),
-        plot.title = element_text(face="bold",color="black",hjust=0.5))+
-  labs(title="Age groups and heart disease",y="proportion of population with heart disease",x="")
-```
 
 III.BMI and Heart Disease
 A.Classification of Weight Status by Body Mass Index (BMI)
@@ -142,23 +191,27 @@ bmi_groups <- heart %>%
 heart %>% 
   filter(BMI<50) %>% 
   ggplot(aes(x=HeartDisease,y=BMI))+
-  geom_boxplot(notch = TRUE,fill = "cornflowerblue", 
+  geom_boxplot(fill = "cornflowerblue", 
                alpha = .7)+
   labs(title="BMI average of groups with and without Heart Disease")+
   theme(plot.title = element_text(hjust=0.5,face="bold"))
 ```
 As can be seen from the graph, if the race and sex groups are not seperated to be considered, subjects with heart disease have slightly higher BMI than subjects without heart disease, in which case higher BMI suggeting more possibility of overweight.
 
-```{r}
+```{r,echo=FALSE}
 bmi_groups %>% 
   filter(is.na(bmi_group)==FALSE) %>% 
-  ggplot(aes(x=HeartDisease,y=bmi_group,fill=bmi_group))+
-  geom_col()+
+  ggplot(aes(x=HeartDisease,fill=bmi_group))+
+  geom_bar(stat="count",width=0.5,position = "dodge")+
+  geom_text(stat='count',aes(label=scales::percent(..count../sum(..count..))), color="black", size=3.5, vjust=0.1)+
   labs(title="BMI groups with and without Heart Disease",
        y="")+
+  scale_fill_manual(values = c("darkslateblue","deepskyblue3","#8B4513","#DB7093","#8B008B","#4682B4"))+
   theme(legend.position="none",
         axis.text.y=element_blank(),
         axis.ticks.y=element_blank(),
+         panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank(),
         plot.title = element_text(hjust=0.5,face="bold"))+
   facet_wrap(vars(bmi_group))
 ```
@@ -186,11 +239,12 @@ IV.Heart Disease and habits
 A. Sleep time
 ```{r,echo=FALSE}
 bmi_groups %>% 
-  ggplot(aes(x=SleepTime,fill=HeartDisease))+
-  xlim(0,14)+
-  geom_density(alpha = 0.5)+ 
+  ggplot(aes(y=SleepTime,x=(..count../sum(..count..)),fill=HeartDisease))+
+  geom_histogram()+ 
+  coord_flip()+
+  scale_fill_manual(values=c('#EEE8AA','#B8860B'))+
   labs(title="Heart Disease Probability correlated to average sleep time",
-       y="Probability of heart disease")+
+       y="Average Sleep Time(hour)")+
   theme(plot.title = element_text(face="bold",color="black",hjust=0.5),
         legend.position = "bottom")
 ```
@@ -199,14 +253,22 @@ bmi_groups %>%
 B. Alcohol Drinking and Smoking
 ```{r,echo=FALSE}
 drinking<-bmi_groups %>% 
-  ggplot(aes(x=AlcoholDrinking,y=HeartDisease,fill=HeartDisease))+
+  ggplot(aes(x=AlcoholDrinking,fill=HeartDisease))+
   theme(axis.text.y = element_blank())+
-  geom_bar(stat="identity")
+  geom_bar(stat="count",width=0.5,position='fill')+
+  scale_fill_manual(values=c('#999999','#E69F00'))+
+  geom_text(stat='count',aes(label=scales::percent(..count../sum(..count..))), color="white", size=3.2,position=position_fill(0.5))+
+  labs(y="proportion")+
+  theme_minimal()
+  
 
 smoking<-bmi_groups %>% 
-  ggplot(aes(x=Smoking,y=HeartDisease,fill=HeartDisease))+
+  ggplot(aes(x=Smoking,fill=HeartDisease))+
   theme(axis.text.y = element_blank())+
-  geom_bar(stat="identity")
+   geom_bar(stat="count",width=0.5,position='fill')+
+  geom_text(stat='count',aes(label=scales::percent(..count../sum(..count..))), color="white", size=3.2,position=position_fill(0.5))+
+  labs(y="proportion")+
+  theme_minimal()
 
 drinking+smoking
 ```
