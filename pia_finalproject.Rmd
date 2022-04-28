@@ -12,8 +12,7 @@ library(plotly)
 library(gganimate)
 library(scales)
 library (fmsb)
-library(tidyverse)     # for data cleaning and plotting
-library(gardenR)       # for Lisa's garden data
+library(tidyverse)    
 library(lubridate)     # for date manipulation
 library(openintro)     # for the abbr2state() function
 library(palmerpenguins)# for Palmer penguin data
@@ -28,11 +27,11 @@ library(plotly)        # for the ggplotly() - basic interactivity
 library(gganimate)     # for adding animation layers to ggplots
 library(gifski)        # for creating the gif (don't need to load this library every time,but need it installed)
 library(transformr)    # for "tweening" (gganimate)
-library(shiny)         # for creating interactive apps
-library(patchwork)     # for nicely combining ggplot2 graphs  
-library(gt)            # for creating nice tables
-library(rvest)         # for scraping data
-library(robotstxt)     # for checking if you can scrape data
+library(shiny)         
+library(patchwork)      
+library(gt)            
+library(rvest)        
+library(robotstxt)     
 theme_set(theme_minimal())
 ```
 
@@ -82,7 +81,44 @@ gt1 <- heart_disease %>%
         plot.title = element_text(hjust = 0.5), 
         plot.caption = element_text(size = 8.5)) 
 
-ggplotly(gt1)
+gt2 <- heart_disease %>% 
+  mutate(Race= str_replace(Race, "American Indian/Alaskan Native", "American Indian or
+                               Alaskan Native")) %>% 
+  group_by(Race) %>% 
+  count(HeartDisease) %>% 
+  ggplot(aes(x= n, y = fct_reorder(Race, n), fill = HeartDisease)) +
+  geom_col() +
+  scale_x_continuous(labels = comma) +
+  labs(title = "Heart Disease Prevalence by Race") +
+  theme(axis.text.y.left = element_text(size = 7),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        plot.title = element_text(hjust = 0.5), 
+        plot.caption = element_text(size = 8))
+
+gt3 <- heart_disease %>% 
+  mutate(Race= str_replace(Race, "American Indian/Alaskan Native", "American Indian or
+                               Alaskan Native")) %>% 
+  group_by(AgeCategory) %>% 
+  count(HeartDisease) %>% 
+  ggplot(aes(y = AgeCategory,
+             x = n, 
+             fill = HeartDisease), position = "stack") +
+  geom_col() +
+  scale_x_continuous(labels = comma) +
+  labs(title = "Heart Disease Prevalence by Age Group") +
+  theme(axis.text.y.left = element_text(size = 7),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        plot.title = element_text(hjust = 0.5), 
+        plot.caption = element_text(size = 8))
+
+(gt2/gt3) + gt1
+
 ```
 , 
        caption = "Although there are more females than males in this sample, the difference in number of participants between either sex is not that large."
