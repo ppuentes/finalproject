@@ -102,10 +102,14 @@ server<-function(input,output){
       geom_text(aes(x= 1, y= prop/1.5, label= scales::percent(prop, accuracy = 0.01)))+
       labs(x= NULL,
            y= NULL,
-           title= "Percentage of Population of Similar Characteristics <span style = 'color: lightblue2;'>with Heart Disease</span>")+
+           title= "Percentage of Population of Similar Characteristics <span style = 'color: lightblue2;'>with Heart Disease</span>",
+           caption = "User manual:\n 
+           Please input your weight in kilograms and height in centimeters. Select your age category and whether you exercise and/or smoke.\n
+           Click on the button once you are ready to find out the percentage of surveyed people of similar characteristics to those indicated\n by you who suffer from heart disease.")+
       theme(plot.title = element_markdown())
 
     pie
+    
   })
 }
 
