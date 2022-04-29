@@ -1,34 +1,191 @@
 ---
-title: "112 project"
-output: html_document
+title: 'Tidy Tuesday #5'
+author: "Xinyi Li"
+output: 
+  html_document:
+    df_print: paged
+    code_download: true
+    theme: cerulean
 ---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, error=TRUE, message=FALSE, warning=FALSE)
+```
 
 ```{r}
 library(dplyr)
+library(tidyverse)
 library(readr)
+library(plotly)
+library(gganimate)
+library(lubridate)     
+library(ggthemes)      
+library(janitor)       
+library(ggplot2)
+library(cowplot)
+library(magick)
+library(knitr)
+theme_set(theme_minimal()) 
 ```
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
 ```{r}
-world_report<-read_csv("world-happiness-report.csv")
+heart<-read_csv("heart_2020_cleaned.csv")
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
+```{r}
+summary(heart)
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+heart %>% 
+  group_by(Sex) %>% 
+  count(HeartDisease)
+
+heart %>% 
+  group_by(AgeCategory) %>% 
+  count(HeartDisease)
+
+# heart %>% 
+#   filter(HeartDisease=="Yes",Sex=="Male") %>% 
+#   mutate(num=n()) %>% 
+#   ggplot(aes(x=Smoking,y=num))+
+#   geom_col()+
+#   scale_y_continuous(labels=scales::comma)
+
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+#age group and heart disease
+heart %>% 
+  count(AgeCategory)
+
+heart %>% 
+  filter(HeartDisease=="Yes") %>% 
+  ggplot(aes(x=AgeCategory,fill=AgeCategory))+
+  geom_density(alpha=0.4)+
+  theme(axis.text.x=element_text(angle=45),panel.grid.major = element_blank(),
+        plot.title = element_text(face="bold",color="black",hjust=0.5))+
+  labs(title="Age groups and heart disease",y="proportion of population with heart disease",x="")
+
+
+#the ridges plot
+
+# heart %>% 
+#   filter(HeartDisease=="Yes") %>% 
+#   group_by(AgeCategory) %>% 
+#   summarise(n=n()) %>% 
+#   ggplot(aes(x=n,y=AgeCategory,fill=AgeCategory))+
+#   geom_density_ridges() +
+#   theme_ridges() +
+#   geom_line()+
+#   labs(title="Age groups and heart disease",y="proportion of population with heart disease",x="")
+```
+
+
+
+
+```{r}
+#section 3
+#boxplot
+heart %>% 
+  filter(BMI<50) %>% 
+  ggplot(aes(x=HeartDisease,y=BMI))+
+  geom_boxplot(notch = TRUE,fill = "cornflowerblue", 
+               alpha = .7)+
+  labs(title="BMI average of groups with and without Heart Disease")+
+  theme(plot.title = element_text(hjust=0.5,face="bold"))
+```
+
+```{r}
+#section4
+#bmi groups
+bmi_groups <- heart %>% 
+  mutate(bmi_group=case_when(BMI<18.5~"Underweight",
+                         BMI>=18.5 & BMI<=24.9~"Normal Weight",
+                         BMI>=25 & BMI<=29.9~"Overweight",
+                         BMI>=30 & BMI<=34.9~"Obesity Class I",
+                         BMI>=35 & BMI<=35.9~"Obesity Class II",
+                         BMI>=36~"Extreme Obesity"))
+```
+
+```{r}
+#bmi groups-heart disease
+#first col-plot
+bmi_groups %>% 
+  filter(is.na(bmi_group)==FALSE) %>% 
+  ggplot(aes(x=HeartDisease,y=bmi_group,fill=bmi_group))+
+  geom_col()+
+  labs(title="BMI groups with and without Heart Disease",
+       y="")+
+  theme(legend.position="none",
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        plot.title = element_text(hjust=0.5,face="bold"))+
+  facet_wrap(vars(bmi_group))
+```
+```{r}
+# bmi_groups %>% 
+#   group_by(Race,HeartDisease) %>% 
+#   summarise(mean_bmi=mean(BMI)) %>% 
+#   ggplot(aes(x=HeartDisease,y=mean_bmi,fill=Race))+
+#   geom_bar(stat = "identity",position="dodge")+
+#   geom_text(aes(label = round(mean_bmi,2)),position = position_dodge(.9), vjust = 1.5, colour = "white", size = 2)+
+#   scale_y_continuous(labels=scales::comma)+
+#   facet_wrap(vars(Race))+
+#   labs(title="BMI average of sex and race groups with and without Heart Disease",
+#        y="Average BMI")
+```
+
+```{r}
+#stacked bar plot
+bmi_groups %>% 
+  group_by(Race,HeartDisease,Sex) %>% 
+  summarise(mean_bmi=mean(BMI)) %>% 
+  ggplot(aes(x=HeartDisease,y=mean_bmi,fill=Sex))+
+  geom_bar(stat = "identity",position="dodge")+
+  geom_text(aes(label = round(mean_bmi,2)),position = position_dodge(.9), vjust = 1.5, colour = "white", size = 2)+
+  scale_y_continuous(labels=scales::comma)+
+  facet_wrap(vars(Race))+
+  scale_fill_manual(values = c("darkslateblue","deepskyblue3"))+
+  labs(title="BMI average of sex and race groups with and without Heart Disease",
+       y="Average BMI")
+```
+
+
+#habbits and heart disease
+```{r}
+#sleep and heart disease
+bmi_groups %>% 
+  ggplot(aes(x=SleepTime,fill=HeartDisease))+
+  xlim(0,14)+
+  geom_density(alpha = 0.5)+ 
+  labs(title="Heart Disease Probability correlated to average sleep time",
+       y="Probability of heart disease")+
+  #facet_wrap(vars(Smoking))+ #or alcoholdrinking
+  theme(plot.title = element_text(face="bold",color="black",hjust=0.5),
+        legend.position = "bottom")#start from here,stack
+```
+
+```{r}
+#alcohol drinking and heart disease
+
+#??other forms?
+bmi_groups %>% 
+  ggplot(aes(x=AlcoholDrinking,y=HeartDisease,fill=AlcoholDrinking))+
+  geom_col()+
+  facet_wrap(vars(HeartDisease))
+```
+```{r}
+#smoking and heart disease
+
+#??other forms?
+bmi_groups %>% 
+  ggplot(aes(x=Smoking,y=HeartDisease,fill=Smoking))+
+  geom_col()+
+  facet_wrap(vars(HeartDisease))
+```
+
+```{r}
+#other graph type:mosaic,density,scatter,dotplot, see the data viz textbook
+#other correlation type?
+#anyway to make scatter or linear?
+```
