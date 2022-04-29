@@ -10,10 +10,10 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE,warning = FALSE,message=FALSE)
 ```
 
-```{r,echo=FALSE}
+```{r}
 library(dplyr)
 library(tidyverse)
 library(readr)
@@ -25,57 +25,75 @@ library(patchwork)
 library(ggthemes)      
 library(janitor)       
 library(ggplot2)
+library(scales)
+library (fmsb)
+library(openintro)     # for the abbr2state() function
+library(gplots)        # for col2hex() function
+library(RColorBrewer)  # for color palettes
+library(sf)            # for working with spatial data
+library(ggthemes)      # for more themes (including theme_map())
+library(gifski)        # for creating the gif (don't need to load this library every time,but need it installed)
+library(transformr)    # for "tweening" (gganimate)
+library(shiny)        
+library(rvest)        
+library(robotstxt)    
 library(cowplot)
 library(magick)
 library(knitr)
 theme_set(theme_minimal()) 
 ```
 
-```{r}
+```{r,echo=FALSE}
 heart<-read_csv("heart_2020_cleaned.csv")
 ```
 
-## Introduction and background
+# INTRODUCTION & BACKGROUND
 
-Heart disease is one of the leading causes of death for most Americans, regardless of race (CDC). Around 47% of Americans have at least 1 out of 3 major risk factors for heart disease, which are: high cholesterol, high blood pressure, and smoking. Obesity (High BMI), diabetes, physical activity levels, and alcohol consumption are also considered as key indicators. Identifying the factors that have the most influence on heart disease prevalence is important in order to act on them earlier. By looking at data from the CDC, we aim to detect patterns that could potentially help predict a patient’s predisposition to heart disease. 
-Our group chose to focus our research on those main factors: BMI, Race, Sex, Age, and living habbits. 
+Heart disease is one of the leading causes of death for most Americans, regardless of race (CDC). Around 47% of Americans have at least 1 out of 3 major risk factors for heart disease, which are: high cholesterol, high blood pressure, and smoking. Obesity (High BMI), diabetes, physical activity levels, and alcohol consumption are also considered as key indicators. Identifying the factors that have the most influence on heart disease prevalence is important in order to act on them earlier. By looking at data from CDC’s Behavioral Risk Factor Surveillance System (BRFSS), we aim to detect patterns that could potentially help predict a patient’s predisposition to heart disease. 
 
-
-## Data Collection
-
-Originally, the dataset comes from the CDC and is a major part of the Behavioral Risk Factor Surveillance System (BRFSS), which conducts annual telephone surveys to gather data on the health status of U.S. residents. As the CDC describes: "Established in 1984 with 15 states, BRFSS now collects data in all 50 states as well as the District of Columbia and three U.S. territories. BRFSS completes more than 400,000 adult interviews each year, making it the largest continuously conducted health survey system in the world.". The most recent dataset (as of February 15, 2022) includes data from 2020. It consists of 401,958 rows and 279 columns. The vast majority of columns are questions asked to respondents about their health status, such as "Do you have serious difficulty walking or climbing stairs?" or "Have you smoked at least 100 cigarettes in your entire life? [Note: 5 packs = 100 cigarettes]". In this dataset, I noticed many different factors (questions) that directly or indirectly influence heart disease, so I decided to select the most relevant variables from it and do some cleaning so that it would be usable for machine learning projects. 2020 annual CDC survey data of 400k adults related to their health status.
+Our group chose to focus our research on those main factors: BMI, Race, Sex, Age, and some lifestyle choices such as smoking, drinking, and sleeptime. 
 
 
-## Analysis
+## DATA COLLECTION
 
-# DEMOGRAPHICS OF SAMPLES
+As mentioned, the dataset originates from the CDC and the Behavioral Risk Factor Surveillance System (BRFSS). The annual survey, which is conducted through phone calls, collects information on the health of residents in the USA.It was established in 1984 with 15 states and now gathers data from all 50 states as well as the District of Columbia and three U.S. territories. It is one of the largest consistently performed health survey in the world, with more than 400,000 adult participants per year. The data we are using in this project comes from the 2020 survey of 400,000 adults in the country, which is the most recent publicly shared version form the CDC. 
 
-I.Number of subjects according to sex
+
+## ANALYSIS
+
+***Demographic Break-down of Sample***
+
+The following three tables provide a quick look at the demographic breakdown of the sample from our dataset. The tables include the number and percentage of survey participants according to their Race, Sex, and Age.
 
 ```{r,echo=FALSE}
 heart1 <- heart %>% 
   count(Sex) %>% 
-  mutate(Percentage = 100*(n/sum(n)))
+  mutate(Percentage = (n/sum(n))) %>% 
+  rename(Count = n)
 
 heart_gt <- heart1 %>% 
   gt(rowname_col = "row",
     groupname_col = "group") %>% 
   tab_options(column_labels.background.color = "lightblue") %>% 
-   tab_header(
-    title = "Sex of Sample from Dataset",
+   tab_header(title = "Sex of Sample from Dataset",
     subtitle = md("")
-  ) 
+  ) %>% 
+  
+  fmt_integer(columns = Count) %>% 
+  fmt_percent(columns = Percentage)
 
 heart_gt
+
 ```
 
+\  
 
-II.Number of Sample according to Race
 
 ```{r,echo=FALSE}
 race <- heart %>% 
   count(Race) %>% 
-  mutate(Percentage = 100*(n/sum(n)))
+  mutate(Percentage = (n/sum(n))) %>% 
+  rename(Count = n)
 
 race_gt <- race %>% 
   gt(rowname_col = "row",
@@ -84,53 +102,142 @@ race_gt <- race %>%
    tab_header(
     title = "Race of Sample from Dataset",
     subtitle = md("")
-  ) 
+  ) %>% 
+  fmt_integer(columns = Count) %>% 
+  fmt_percent(columns = Percentage)
 
 race_gt
 ```
+\  
+
+```{r, echo=FALSE}
+age <- heart %>% 
+  count(AgeCategory) %>% 
+  mutate(Percentage = (n/sum(n))) %>% 
+  rename(Count = n,
+         Ages = AgeCategory) 
+
+age_gt <- age %>% 
+  gt(rowname_col = "row",
+    groupname_col = "group") %>% 
+  tab_options(column_labels.background.color = "lightgreen") %>% 
+   tab_header(
+    title = "Age Ranges of Sample from Dataset",
+    subtitle = md("")
+  ) %>% 
+  fmt_integer(columns = Count) %>% 
+  fmt_percent(columns = Percentage)
+
+age_gt
+```
+\  
 
 
-# DEMOGRAPHICS & HEART DISEASE PREVALENCE
 
-I.Race and Heart Disease
+***Heart Disease Prevalence According to Demographics***
+
+**I. Race, Age Group, Sex, and the Likelihood of Heart Disease**
+\  
 
 ```{r,echo=FALSE}
-race_prevalence <- heart %>% 
-  group_by(Race) %>% 
-  count(HeartDisease) %>% 
-  ggplot(aes(x = Race,
-             y = n, 
+gt1 <- heart %>%
+  group_by(HeartDisease) %>%
+  count(Sex) %>%
+  mutate(Percentage = 100*(n/sum(n))) %>%
+  ggplot(aes(y = Sex,
+             x = n,
+             fill = HeartDisease)) +
+  geom_col() +
+  scale_x_continuous(labels = label_number(suffix = "K", scale = .001)) +
+  scale_fill_manual(values = c("#008B8B","#7FFFD4"))+
+  labs(title = "Heart Disease Prevalence by Sex") +
+  theme(
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        plot.title = element_text(hjust = 0.5,face="bold",size=10),
+        plot.caption = element_text(size = 8.5),
+        legend.position = "bottom")
+
+gt2 <- heart %>%
+  mutate(Race= str_replace(Race, "American Indian/Alaskan Native", "American Indian or
+                               Alaskan Native")) %>%
+  group_by(Race) %>%
+  count(HeartDisease) %>%
+  ggplot(aes(x= n, y = fct_reorder(Race, n), fill = HeartDisease)) +
+  geom_col() +
+  scale_x_continuous(labels = label_number(suffix = "K", scale = .001)) +
+  labs(title = "Heart Disease Prevalence by Race") +
+  scale_fill_manual(values = c("darkslateblue","deepskyblue3"))+
+  theme(axis.text.y.left = element_text(size = 7),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        plot.title = element_text(hjust = 0.5,face="bold",size=10),
+        plot.caption = element_text(size = 8),
+        legend.position = "bottom")
+
+gt3 <- heart %>%
+  mutate(Race= str_replace(Race, "American Indian/Alaskan Native", "American Indian or
+                               Alaskan Native")) %>%
+  group_by(AgeCategory) %>%
+  count(HeartDisease) %>%
+  ggplot(aes(y = AgeCategory,
+             x = n,
              fill = HeartDisease), position = "stack") +
   geom_col() +
-  labs(title = "Heart Disease Prevalence by Race")
-  theme(axis.title.y = element_blank(),
-        axis.text.x = element_text(size = 6.5))
-  
-ggplotly(race_prevalence)
+  scale_x_continuous(labels = label_number(suffix = "K", scale = .001)) +
+  labs(title = "Heart Disease Prevalence by Age Group") +
+  scale_fill_manual(values = c("#8A2BE2","#FFB6C1"))+
+  theme(axis.text.y.left = element_text(size = 7),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        plot.title = element_text(hjust = 0.5,face="bold",size=10),
+        plot.caption = element_text(size = 8),
+        legend.position = "bottom", 
+        )
+
+gt3 + (gt2/gt1) 
 ```
 
-II.Age Groups and Heart Disease
 
-```{r,echo=FALSE}
-heart %>% 
-  filter(HeartDisease=="Yes") %>% 
-  ggplot(aes(x=AgeCategory,fill=AgeCategory))+
-  geom_density(alpha=0.4)+
-  theme(axis.text.x=element_text(angle=45),panel.grid.major = element_blank(),
-        plot.title = element_text(face="bold",color="black",hjust=0.5))+
-  labs(title="Age groups and heart disease",y="proportion of population with heart disease",x="")
-```
 
-III.BMI and Heart Disease
-A.Classification of Weight Status by Body Mass Index (BMI)
-1.Use argument to make each BMI category:
+Heart disease patients are mostly distributed in elderly groups over the age 50.From individuals with the age smaller than 50, heart disease is a rarely seen prevalence with a rate lower then 5%. In each age group over 50 while smaller than 75, the rate of heart disease is about 10% to 16%. In elder age groups, the rate of heart disease is about 20%, accounting for one-fifth of the population.
+\  
+As the survey has the most components as white subjects, the overall rate of heart disease prevalence for white seems to be overwhelmingly high, while it's not the genuine truth due to unequal distributed population.
+\  
+Male appear to have higher rates of heart disease, which is about 11%, than female do, which is about 6.5%.
+
+
+
+
+**II. BMI and Heart Disease**
+
+BMI stands for Body Nass Index. BMIs are values taken from the mass and height of an individual. One is able to calculate their BMI by taking body mass (kg) and dividing it by the square of body height (m).
+
+
+Below are the different categories of BMIs:
+
+
   Underweight = <18.5
+  
   Normal wright = 18.5-24.9
+  
   Overweight = 25-29.9
+  
   Obesity Class I = 30-34.9
+  
   Obesity Class 2 = 35-35.9
+  
   Extreme Obesity = >40
-
+  
+  
+  \  
+  
 ```{r,echo=FALSE}
 bmi_groups <- heart %>% 
   mutate(bmi_group=case_when(BMI<18.5~"Underweight",
@@ -142,30 +249,48 @@ bmi_groups <- heart %>%
 heart %>% 
   filter(BMI<50) %>% 
   ggplot(aes(x=HeartDisease,y=BMI))+
-  geom_boxplot(notch = TRUE,fill = "cornflowerblue", 
+  geom_boxplot(fill = "cornflowerblue", 
                alpha = .7)+
-  labs(title="BMI average of groups with and without Heart Disease")+
+  labs(title="BMI Average of Individuals With and Without Heart Disease")+
   theme(plot.title = element_text(hjust=0.5,face="bold"))
 ```
+\  
+
 As can be seen from the graph, if the race and sex groups are not seperated to be considered, subjects with heart disease have slightly higher BMI than subjects without heart disease, in which case higher BMI suggeting more possibility of overweight.
 
-```{r}
+
+\  
+
+
+
+
+```{r,echo=FALSE}
 bmi_groups %>% 
   filter(is.na(bmi_group)==FALSE) %>% 
-  ggplot(aes(x=HeartDisease,y=bmi_group,fill=bmi_group))+
-  geom_col()+
+  ggplot(aes(x=HeartDisease,fill=bmi_group))+
+  geom_bar(stat="count",width=0.5,position = "dodge")+
+  geom_text(stat='count',aes(label=scales::percent(..count../sum(..count..),accuracy=0.1)), color="black", size=3.5, vjust=-0.5)+
+  facet_wrap(vars(bmi_group))+
   labs(title="BMI groups with and without Heart Disease",
        y="")+
+  scale_fill_manual(values = c("darkslateblue","deepskyblue3","#8B4513","#DB7093","#8B008B","#4682B4"))+
+  scale_y_continuous(expand = expansion(mult = c(0,0.1)))+
   theme(legend.position="none",
         axis.text.y=element_blank(),
         axis.ticks.y=element_blank(),
-        plot.title = element_text(hjust=0.5,face="bold"))+
-  facet_wrap(vars(bmi_group))
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        panel.grid.major.x = element_blank(),
+        plot.title = element_text(hjust=0.5,face="bold"))
 ```
+\  
+
 We have to reveal that, in this dataset, there is an unequal distribution of BMI as the largest portion of subjects have the BMI categorized as overweight class. Thus, it’s not justifiable to conclude that overweight subjects have a lower rate of getting heart disease based on this graph, as the same with normal class and obesity class I.
 
 
-2.The BMI average of race groups, in disparison of sex
+\  
+
+
 
 ```{r,echo=FALSE}
 bmi_groups %>% 
@@ -177,43 +302,110 @@ bmi_groups %>%
   scale_y_continuous(labels=scales::comma)+
   facet_wrap(vars(Race))+
   scale_fill_manual(values = c("darkslateblue","deepskyblue3"))+
-  labs(title="BMI average of sex and race groups with and without Heart Disease",
-       y="Average BMI")
+  labs(title="Heart Disease According to the BMI Average Among Different Races and Sexes",
+       y="Average BMI") +
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        plot.title = element_text(face = "bold",
+                                  size = 10))
 ```
 
-IV.Heart Disease and habits
+\  
+
+There's not an observation of sharp distinction between male and female in both heart disease groups,suggesting sex is not an deciding factor of Heart Disease. However, male generally do have relatively higher BMI average than female do. 
+\  
+Among all race and sex groups, the ones with heart disease generally appear to have higher BMI average for both sexes, suggesting the possibility that higher BMI leads to higher heart disease risk.
+\  
+
+
+**IV. Heart Disease and Lifestyle Choices**
 
 A. Sleep time
+
 ```{r,echo=FALSE}
 bmi_groups %>% 
   ggplot(aes(x=SleepTime,fill=HeartDisease))+
-  xlim(0,14)+
-  geom_density(alpha = 0.5)+ 
-  labs(title="Heart Disease Probability correlated to average sleep time",
-       y="Probability of heart disease")+
+  geom_histogram()+ 
+  facet_wrap(vars(HeartDisease),scales="free_y",ncol=1)+
+  scale_fill_manual(values=c('#EEE8AA','#B8860B'))+
+  labs(title="Heart Disease Correlated to Average Sleep Time",
+       x="Average Sleep Time(hour)")+
   theme(plot.title = element_text(face="bold",color="black",hjust=0.5),
-        legend.position = "bottom")
+        legend.position = "none",
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank())
+
 ```
 
 
-B. Alcohol Drinking and Smoking
+
+
+The sleeping pattern of both groups with or without heart disease don't vary a lot, as the most sleep around 6-8 hours a day. While we would observe some sleeping hour over 10 in the group with heart disease, as it is also a scientific theory that oversleep would be the factor of Cardiovascular disease.
+
+\  
+
+
+B. Heart Disease when Drinking Alcohol and Smoking
 ```{r,echo=FALSE}
 drinking<-bmi_groups %>% 
-  ggplot(aes(x=AlcoholDrinking,y=HeartDisease,fill=AlcoholDrinking))+
-  geom_col()+
-  facet_wrap(vars(HeartDisease))
+  ggplot(aes(x=AlcoholDrinking,fill=HeartDisease))+
+  geom_bar(stat="count",width=0.5,position='fill')+
+  scale_fill_manual(values=c('#999999','#E69F00'))+
+  geom_text(stat='count',aes(label=scales::percent(..count../sum(..count..))), color="white", size=3.2,position=position_fill(0.5))+
+  labs(y="",x="",
+       title = "Heart Disease Prevalence\nBased on Drinking Habits")+
+  theme(axis.text.y = element_blank(),
+        plot.title = element_text(face = "bold",
+                                  size = 12,
+                                  hjust = 0.5),
+        legend.position = "bottom", 
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank())
+  
 
 smoking<-bmi_groups %>% 
-  ggplot(aes(x=Smoking,y=HeartDisease,fill=Smoking))+
-  geom_col()+
-  facet_wrap(vars(HeartDisease))
+  ggplot(aes(x=Smoking,fill=HeartDisease))+
+  theme(axis.text.y = element_blank())+
+   geom_bar(stat="count",width=0.5,position='fill')+
+  geom_text(stat='count',aes(label=scales::percent(..count../sum(..count..))), color="white", size=3.2,position=position_fill(0.5))+
+  labs(y="",x="",
+title = "Heart Disease Prevalence\nBased on Smoking Habits")+
+theme(axis.text.y = element_blank(),
+        plot.title = element_text(face = "bold",
+                                  size = 12,
+                                  hjust = 0.5),
+      legend.position = "bottom",
+      panel.grid.major.x = element_blank(),
+      panel.grid.major.y = element_blank(),
+      panel.grid.minor.x = element_blank(),
+      panel.grid.minor.y = element_blank()
+        )
 
 drinking+smoking
 ```
 
-V. Calculator of People With Heart Disease According To Factors
+
+
+In terms of individuals who drink, approximately 92% of them do not have heart disease, suggesting it's not a deciding factor. Surprisingly, the rate of people without heart disease in the non-drinking group is similar, at 91.4%, also supporting the conclusion.
+\  
+In the non-smoking group, 93% are reported to have no heart disease, while the rate in smoking group is onlu 87%, suggesting smoking habit has a bigger impact on heart disease than drinking.
+\  
+
+
+
+**V. Heart Disease Calculator**
+
+Using this calculator app, individuals may indicate characteristics and lifestyle choices to see the proportion of participants from the survey with similar backgrounds who have and do not have heart disease. Through comparisons, they may be able to have some insight on the likelihood of getting heart disease. 
 
 [here](https://marcelasaavedra.shinyapps.io/Heart_Disease_Prevalence/)
 
-##Conclusion
+\  
+
+## Conclusion
+
+In this project, we hope to shift individuals’ priorities towards prevention rather than medical intervention.By visualizing data from the CDC and Behavioral Risk Factor Surveillance System (BRFSS), readers will have the ability to better understand information that may otherwise be difficult to comprehend or access — information that can also be critical to the decision-making processes that people undergo on a daily basis. By seeing what characteristics and activities make one more vulnerable to experiencing heart disease, individuals can hopefully make the necessary adjustments to their lifestyles if necessary. At the end of the day, the people have the power to choose what they want to do with the information that is given to them; however, having sufficient and accurate sources are necessary for people to make well-informed choices. 
 
