@@ -195,18 +195,18 @@ gt3 + (gt2/gt1)
 
 
 
-Heart disease patients are mostly distributed in older groups over the age 50. 20% of indivuals older than 50 reported heart disease, accounting for one-fifth of the population.From individuals with the age smaller than 50, heart disease is a rarely seen prevalence with a rate lower then 5%. In each age group over 50 while smaller than 75, the rate of heart disease is about 10% to 16%. 
+Heart disease is primarily found within age groups over 50. 20% of individuals older than 50 reported heart disease, accounting for one-fifth of the population. Meanwhile, less than 5% of survey participants under the age of 50 report heart disease. In each age group over 50 but under 75, around 10% to 16% erport heart disease. 
 \  
-As the survey has the most components as white subjects, the overall rate of heart disease prevalence for white seems to be overwhelmingly high, while it's not the genuine truth due to unequal distributed population.
+Given that most of the sample is white, the overall rate of heart disease prevalence for white identifying folks seems to be overwhelmingly high. This means that these findings cannot be generalized to the represent larger populations outside of the survey. 
 \  
-Male appear to have higher rates of heart disease, which is about 11%, than female do, which is about 6.5%.
+Males appear to have higher rates of heart disease, with about 11% reporting it, than females do at about 6.5%.
 
 
 
 
 **II. BMI and Heart Disease**
 
-BMI stands for Body Nass Index. BMIs are values taken from the mass and height of an individual. One is able to calculate their BMI by taking body mass (kg) and dividing it by the square of body height (m).
+BMI stands for Body Mass Index. BMIs are values taken from the mass and height of an individual. One is able to calculate their BMI by taking body mass (kg) and dividing it by the square of body height (m).
 
 
 Below are the different categories of BMIs:
@@ -245,7 +245,7 @@ heart %>%
 ```
 \  
 
-As can be seen from the graph, if the race and sex groups are not seperated to be considered, subjects with heart disease have slightly higher BMI than subjects without heart disease, in which case higher BMI suggeting more possibility of overweight.
+The graph above shows that subjects with heart disease have slightly higher BMI than subjects without heart disease. This indicates that higher BMIs mean an increased possibility of experiencing heart disease. 
 
 
 \  
@@ -274,7 +274,7 @@ bmi_groups %>%
 ```
 \  
 
-We have to reveal that, in this dataset, there is an unequal distribution of BMI as the largest portion of subjects have the BMI categorized as overweight class. Thus, it’s not justifiable to conclude that overweight subjects have a lower rate of getting heart disease based on this graph, as the same with normal class and obesity class I.
+In this dataset, there is a disproportionate amount of survey participants that fall under the BMI category of overweight. It may therefore be a stretch to conclude that overweight subjects, as well as those classified under normal and obese, are less likely to have heart disease.
 
 
 \  
@@ -303,9 +303,9 @@ bmi_groups %>%
 
 \  
 
-There's not an observation of sharp distinction between male and female in both heart disease groups,suggesting sex is not an deciding factor of Heart Disease. However, male generally do have relatively higher BMI average than female do. 
+There is no significant distinction between males and females in regards to reporting heart disease. This implies that sex is not an key indicator of Heart Disease. However, males generally have relatively higher BMI averages than female do. 
 \  
-Among all race and sex groups, the ones with heart disease generally appear to have higher BMI average for both sexes, suggesting the possibility that higher BMI leads to higher heart disease risk.
+Across all race and sex groups, survey participants that reported heart disease generally have higher BMI averages, further strengthening the hypothesis that higher BMI increases the likelihood of experiencing heart disease.
 \  
 
 
@@ -331,7 +331,7 @@ bmi_groups %>%
 
 
 
-The sleeping pattern of both groups with or without heart disease don't vary a lot, as the most sleep around 6-8 hours a day. While we would observe some sleeping hour over 10 in the group with heart disease, as it is also a scientific theory that oversleep would be the factor of Cardiovascular disease.
+The average sleeptime of participants with and without heart disease don't vary by much, with most of the sample reporting sleeptime at around 6-8 hours a day. However, we can observe a notable amount of individuals sleeping over 10 hours and reporting heart disease, which may connect to the scientific theory that oversleeping is correlated to Cardiovascular disease.
 
 \  
 
@@ -379,16 +379,16 @@ drinking+smoking
 
 
 
-In terms of individuals who drink, approximately 92% of them do not have heart disease, suggesting it's not a deciding factor. Surprisingly, the rate of people without heart disease in the non-drinking group is similar, at 91.4%, also supporting the conclusion.
+Approximately 92% of survey participants who consume alcohol do not report heart disease, suggesting that alcohol consumption is not a deciding factor. Further supporting this theory, the percentage of people without heart disease in the non-drinking group is at 91.4%.
 \  
-In the non-smoking group, 93% are reported to have no heart disease, while the rate in smoking group is onlu 87%, suggesting smoking habit has a bigger impact on heart disease than drinking.
+In the non-smoking group, 93%  reported no heart disease. Meanwhile, there is a lower percentage of participants in the smoking group (87%) that did not report heart disease. This could suggest thaht smoking habits have a bigger impact on heart disease than drinking.
 \  
 
 
 
 **V. Heart Disease Calculator**
 
-Using this calculator app, individuals may indicate characteristics and lifestyle choices to see the proportion of participants from the survey with similar backgrounds who have and do not have heart disease. Through comparisons, they may be able to have some insight on the likelihood of getting heart disease. 
+Using this calculator tool, individuals may indicate characteristics and lifestyle choices to see the proportion of participants from the survey with similar backgrounds who have and do not have heart disease. Through comparisons, they may be able to have some insight on the likelihood of getting heart disease. 
 
 
 ```{r, echo=FALSE, show_col_types = FALSE}
