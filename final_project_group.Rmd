@@ -7,6 +7,7 @@ output:
     df_print: paged
     code_download: true
     theme: cerulean
+runtime: shiny
 ---
 
 ```{r setup, include=FALSE}
@@ -40,6 +41,8 @@ library(robotstxt)
 library(cowplot)
 library(magick)
 library(knitr)
+library(rsconnect)
+library(ggtext)
 theme_set(theme_minimal()) 
 ```
 
@@ -401,9 +404,7 @@ In the non-smoking group, 93% are reported to have no heart disease, while the r
 
 Using this calculator app, individuals may indicate characteristics and lifestyle choices to see the proportion of participants from the survey with similar backgrounds who have and do not have heart disease. Through comparisons, they may be able to have some insight on the likelihood of getting heart disease. 
 
-<<<<<<< HEAD
-[here](https://marcelasaavedra.shinyapps.io/Heart_Disease_Prevalence/)
-=======
+
 ```{r, echo=FALSE, show_col_types = FALSE}
  #Reading the dataset 
 
@@ -511,7 +512,6 @@ server=function(input,output){
 }
 )
 ```
->>>>>>> e895cee8bbcf6ad87bca3a35375baa45f75e13c5
 
 \  
 
