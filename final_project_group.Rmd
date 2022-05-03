@@ -512,8 +512,6 @@ server=function(input,output){
 )
 ```
 
-[here](https://marcelasaavedra.shinyapps.io/Heart_Disease_Prevalence/)
-
 \  
 
 ## Conclusion
