@@ -15,31 +15,17 @@ knitr::opts_chunk$set(echo = FALSE,warning = FALSE,message=FALSE)
 ```
 
 ```{r}
-library(dplyr)
+library(scales)
 library(tidyverse)
-library(readr)
-library(plotly)
-library(gganimate)
 library(gt)
 library(lubridate)     
 library(patchwork)
 library(ggthemes)      
 library(janitor)       
-library(ggplot2)
-library(scales)
-library (fmsb)
-library(openintro)     # for the abbr2state() function
-library(gplots)        # for col2hex() function
-library(RColorBrewer)  # for color palettes
-library(sf)            # for working with spatial data
-library(ggthemes)      # for more themes (including theme_map())
-library(gifski)        # for creating the gif (don't need to load this library every time,but need it installed)
-library(transformr)    # for "tweening" (gganimate)
+library(fmsb)
+library(RColorBrewer) 
+library(ggthemes)    
 library(shiny)        
-library(rvest)        
-library(robotstxt)    
-library(cowplot)
-library(magick)
 library(knitr)
 library(rsconnect)
 library(ggtext)
